@@ -793,7 +793,7 @@ def add_file_layers_to_queue(queue, job_id, job_url, files, commit_sha, rerun):
                     delay = timedelta(seconds=len(tasks))
 
                     queue.put(task.asdata(), expected_at=td2str(delay))
-                    tasks[file_id] = file_name
+                    tasks[file_id + ':' + layer + ':' + layersource_name] = file_name
 
     return tasks
 
