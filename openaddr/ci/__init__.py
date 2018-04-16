@@ -785,6 +785,9 @@ def add_file_layers_to_queue(queue, job_id, job_url, files, commit_sha, rerun):
                 for layersource in source['layers'][layer]:
                     layersource_name = layersource.get('name', None);
 
+                    file_id = "{}:{}:{}".format(file_id, layer, layersource)
+                    file_name = "{}:{}:{}".format(file_name, layer, layersource)
+
                     task = queuedata.Task(job_id=job_id, url=job_url, name=file_name,
                                           content_b64=content_b64, file_id=file_id,
                                           commit_sha=commit_sha, rerun=rerun,
@@ -795,7 +798,7 @@ def add_file_layers_to_queue(queue, job_id, job_url, files, commit_sha, rerun):
                     delay = timedelta(seconds=len(tasks))
 
                     queue.put(task.asdata(), expected_at=td2str(delay))
-                    tasks[file_id + ':' + layer + ':' + layersource_name] = file_name
+                    tasks[file_id] = file_name
 
     return tasks
 
@@ -964,7 +967,7 @@ def pop_task_from_taskqueue(s3, task_queue, done_queue, due_queue, heartbeat_que
 
         taskdata = queuedata.Task(**task.data)
         _L.info(u'Got file {} from task queue'.format(taskdata.name))
-        passed_on_keys = 'job_id', 'file_id', 'name', 'url', 'content_b64', 'commit_sha', 'set_id', 'rerun'
+        passed_on_keys = 'job_id', 'file_id', 'name', 'url', 'content_b64', 'commit_sha', 'set_id', 'rerun', 'layer', 'layersource'
         passed_on_kwargs = {k: getattr(taskdata, k) for k in passed_on_keys}
         passed_on_kwargs['worker_id'] = _worker_id()
 
@@ -1010,7 +1013,9 @@ def pop_task_from_taskqueue(s3, task_queue, done_queue, due_queue, heartbeat_que
             result = work.do_work(s3, passed_on_kwargs['run_id'], source_name,
                                   passed_on_kwargs['content_b64'],
                                   taskdata.render_preview, output_dir,
-                                  mapbox_key)
+                                  layer=passed_on_kwargs['layer'],
+                                  layersource=passed_on_kwargs['layersource'],
+                                  mapbox_key=mapbox_key)
 
         work_wait.join()
 
