@@ -24,35 +24,42 @@ class Task:
 class Due:
 
     def __init__(self, job_id, url, name, content_b64, commit_sha, file_id,
-                 rerun, set_id, worker_id, run_id, **junk):
+                 rerun, set_id, worker_id, run_id, layer=None, layersource=None,
+                 **junk):
         self.job_id, self.url, self.name = job_id, url, name
         self.content_b64, self.commit_sha = content_b64, commit_sha
         self.file_id, self.rerun, self.set_id = file_id, rerun, set_id
         self.worker_id, self.run_id = worker_id, run_id
+        self.layer = layer;
+        self.layersource = layersource
 
     def asdata(self):
         return dict(job_id=self.job_id, url=self.url, name=self.name,
                     content_b64=self.content_b64, file_id=self.file_id,
                     commit_sha=self.commit_sha, rerun=self.rerun,
                     set_id=self.set_id, worker_id=self.worker_id,
-                    run_id=self.run_id)
+                    run_id=self.run_id, layer=self.layer,
+                    layersource = self.layersource)
 
 class Done:
 
     def __init__(self, job_id, url, name, content_b64, commit_sha, file_id,
                  run_id, result, rerun=None, set_id=None, worker_id=None,
-                 **junk):
+                 layer=None, layersource=None, **junk):
         self.job_id, self.url, self.name = job_id, url, name
         self.content_b64, self.commit_sha = content_b64, commit_sha
         self.file_id, self.rerun, self.set_id = file_id, rerun, set_id
         self.worker_id, self.run_id = worker_id, run_id
         self.result = result
+        self.layer = layer;
+        self.layersource = layersource
 
     def asdata(self):
         data = dict(job_id=self.job_id, url=self.url, name=self.name,
                     content_b64=self.content_b64, file_id=self.file_id,
                     commit_sha=self.commit_sha, run_id=self.run_id,
-                    result=self.result)
+                    result=self.result, layer=self.layer,
+                    layersource=self.layersource)
 
         if self.rerun is not None: data.update(rerun=self.rerun)
         if self.worker_id is not None: data.update(worker_id=self.worker_id)
