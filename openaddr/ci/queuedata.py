@@ -1,6 +1,7 @@
 class Task:
 
     def __init__(self, job_id, url, name, content_b64, commit_sha, file_id,
+                 layer=None, layersource=None,
                  rerun=None, set_id=None, render_preview=False):
         self.job_id, self.url, self.name = job_id, url, name
         self.content_b64, self.commit_sha = content_b64, commit_sha

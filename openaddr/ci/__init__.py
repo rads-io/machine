@@ -752,27 +752,48 @@ def create_queued_job(queue, files, job_url_template, commit_sha, rerun, owner, 
     job_status = None
 
     with queue as db:
-        task_files = add_files_to_queue(queue, job_id, job_url, files, commit_sha, rerun)
+        task_files = add_file_layers_to_queue(queue, job_id, job_url, files, commit_sha, rerun)
         add_job(db, job_id, None, task_files, file_states, file_results, owner, repo, status_url, comments_url)
 
     return job_id
 
-def add_files_to_queue(queue, job_id, job_url, files, commit_sha, rerun):
+def add_file_layers_to_queue(queue, job_id, job_url, files, commit_sha, rerun):
     ''' Make a new task for each file, return dict of file IDs to file names.
     '''
     tasks = {}
 
     for (file_name, (content_b64, file_id)) in files.items():
-        task = queuedata.Task(job_id=job_id, url=job_url, name=file_name,
-                              content_b64=content_b64, file_id=file_id,
-                              commit_sha=commit_sha, rerun=rerun,
-                              render_preview=True)
+        source = json.loads(content_b64)
 
-        # Spread tasks out over time.
-        delay = timedelta(seconds=len(tasks))
+        if source.get('schema', None) == None:
+            # Queue V1 Sources (no layers - address only)
+            task = queuedata.Task(job_id=job_id, url=job_url, name=file_name,
+                                  content_b64=content_b64, file_id=file_id,
+                                  commit_sha=commit_sha, rerun=rerun,
+                                  render_preview=True)
 
-        queue.put(task.asdata(), expected_at=td2str(delay))
-        tasks[file_id] = file_name
+            # Spread tasks out over time.
+            delay = timedelta(seconds=len(tasks))
+
+            queue.put(task.asdata(), expected_at=td2str(delay))
+            tasks[file_id] = file_name
+        
+        else:
+            for layer in source['layers']:
+                for layersource in source['layers'][layer]:
+                    layersource_name = layersource.get('name', None);
+
+                    task = queuedata.Task(job_id=job_id, url=job_url, name=file_name,
+                                          content_b64=content_b64, file_id=file_id,
+                                          commit_sha=commit_sha, rerun=rerun,
+                                          layer=layer, layersource=layer_source_name
+                                          render_preview=True)
+
+                    # Spread tasks out over time.
+                    delay = timedelta(seconds=len(tasks))
+
+                    queue.put(task.asdata(), expected_at=td2str(delay))
+                    tasks[file_id] = file_name
 
     return tasks
 
