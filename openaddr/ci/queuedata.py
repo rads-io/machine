@@ -7,12 +7,15 @@ class Task:
         self.content_b64, self.commit_sha = content_b64, commit_sha
         self.file_id, self.rerun, self.set_id = file_id, rerun, set_id
         self.render_preview = render_preview
+        self.layer = layer
+        self.layersource = layersource
 
     def asdata(self):
         data = dict(job_id=self.job_id, url=self.url, name=self.name,
                     content_b64=self.content_b64, file_id=self.file_id,
                     render_preview=self.render_preview,
-                    commit_sha=self.commit_sha)
+                    commit_sha=self.commit_sha
+                    layer=self.layer, layersource=self.layersource)
 
         if self.rerun is not None: data.update(rerun=self.rerun)
         if self.set_id is not None: data.update(set_id=self.set_id)
