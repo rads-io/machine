@@ -786,7 +786,7 @@ def add_file_layers_to_queue(queue, job_id, job_url, files, commit_sha, rerun):
                     task = queuedata.Task(job_id=job_id, url=job_url, name=file_name,
                                           content_b64=content_b64, file_id=file_id,
                                           commit_sha=commit_sha, rerun=rerun,
-                                          layer=layer, layersource=layer_source_name
+                                          layer=layer, layersource=layer_source_name,
                                           render_preview=True)
 
                     # Spread tasks out over time.

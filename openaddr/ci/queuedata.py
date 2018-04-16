@@ -14,7 +14,7 @@ class Task:
         data = dict(job_id=self.job_id, url=self.url, name=self.name,
                     content_b64=self.content_b64, file_id=self.file_id,
                     render_preview=self.render_preview,
-                    commit_sha=self.commit_sha
+                    commit_sha=self.commit_sha,
                     layer=self.layer, layersource=self.layersource)
 
         if self.rerun is not None: data.update(rerun=self.rerun)
