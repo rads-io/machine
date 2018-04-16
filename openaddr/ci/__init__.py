@@ -765,7 +765,10 @@ def add_file_layers_to_queue(queue, job_id, job_url, files, commit_sha, rerun):
     tasks = {}
 
     for (file_name, (content_b64, file_id)) in files.items():
-        source = json.loads(content_b64)
+        try: 
+            source = json.loads(content_b64)
+        except:
+            source = {}
 
         if source.get('schema', None) == None:
             # Queue V1 Sources (no layers - address only)
