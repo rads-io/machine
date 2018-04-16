@@ -744,8 +744,6 @@ def create_queued_job(queue, files, job_url_template, commit_sha, rerun, owner, 
     ''' Create a new job, and add its files to the queue.
     '''
     filenames = list(files.keys())
-    file_states = {name: None for name in filenames}
-    file_results = {name: None for name in filenames}
 
     job_id = calculate_job_id(files)
     job_url = job_url_template and expand_uri(job_url_template, dict(id=job_id))
@@ -753,6 +751,10 @@ def create_queued_job(queue, files, job_url_template, commit_sha, rerun, owner, 
 
     with queue as db:
         task_files = add_file_layers_to_queue(queue, job_id, job_url, files, commit_sha, rerun)
+
+        file_states = {name: None for name in task_files.iterkeys()}
+        file_results = {name: None for name in task_files.iterkeys()}
+
         add_job(db, job_id, None, task_files, file_states, file_results, owner, repo, status_url, comments_url)
 
     return job_id
